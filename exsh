@@ -1,0 +1,5 @@
+#!/usr/bin/env execlineb
+forstdin exsh_cmd
+importas -s exsh_cmd exsh_cmd
+foreground { "$exsh_cmd" }
+printf "\033[38;2;0;255;127m→ \033[0;0m"

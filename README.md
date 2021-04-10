@@ -7,7 +7,7 @@ interactive mode variables
 
 they are stored in /tmp/exsh (i know its insecure but i havent found better way of doing it) and because of that they are shared between all instances of exsh
 
-setvar functions sets variable that is shared between multiple commands, for example:
+setvar function sets variable that is shared between multiple commands, for example:
 
 `setvar a b` and then running `echo $a` will print b,
 

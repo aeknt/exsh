@@ -8,7 +8,9 @@ interactive mode variables
 they are stored in /tmp/exsh (i know its insecure but i havent found better way of doing it) and because of that they are shared between all instances of exsh
 
 setvar functions sets variable that is shared between multiple commands, for example:
-`setvar a b` and then running `echo $a` will print b
+
+`setvar a b` and then running `echo $a` will print b,
+
 unlike `define` it cant execute command directly after it, and define unlike `setvar` cant share variables between multiple commands in interactive mode
 
 reset resets all interactive mode variables

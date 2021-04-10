@@ -12,6 +12,10 @@ ifthenelse { test $if = setvar } {
 	redirfd -a 1 /tmp/exsh echo define $var $cont
 } { ifthenelse { test $if = reset } {
 	rm /tmp/exsh
+} { ifthenelse { test $if = cd } {
+	backtick path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+	importas path path
+	cd $path exsh
 } {
 ifthenelse { test -f /tmp/exsh } { true } { touch /tmp/exsh }
 backtick env { cat /tmp/exsh }
@@ -24,4 +28,4 @@ ifthenelse { test -f ${home}/.exshrc } {
 	backtick env { cat ${home}/.exshrc }
 	importas env env
 	execlineb -c $env
-} { printf "\033[38;2;0;255;127m→ \033[0;0m" } } }
+} { printf "\033[38;2;0;255;127m→ \033[0;0m" } } } }

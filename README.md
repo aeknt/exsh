@@ -15,18 +15,38 @@ reset resets all interactive mode variables
 
 customizing:
 
-if ~/.exshrc exists, exsh will instead of printing prompt execute ~/.exshrc and uses its output as prompt
+~/.exshrc can be written in any lang as long as ~/.exshrc prints wanted $PS1 when ran without args, when ran with arg function then print all defined functions and when ran with fn <function> then execute given function
 
 example configuration can look like:
-
 ```
-importas user USER
-importas pwd PWD
-printf "\033[38;2;0;255;127m:${user}:${pwd}:$ \033[0;0m"
+#!/usr/bin/env execlineb
+importas first 1
+importas fn 2
+shift shift
+backtick all { dollarat -d " " }
+importas -s all all
+
+ifelse { test -z $first } {
+	importas user USER
+	backtick hostname { hostname }
+	importas hostname hostname
+	foreground { printf "\033[38;2;0;255;127m${user}@${hostname}$ \033[0;0m" } }
+
+ifelse { test $first = functions } {
+echo "
+hello
+print
+ls
+" }
+
+if { test $first = fn } 
+	ifelse { test $fn = hello  } { dollarat }
+	ifelse { test $fn = print  } { echo $all }
+	ifelse { test $fn = ls  } { ls -l $all }
+	echo no function defined
 ```
 
 more?
 
-i plan to implement function like thing that will cover both functions and aliases and also i plan to implement proper edit line stuff and history
 
-for now you can use https://github.com/hanslub42/rlwrap with exsh: `rlwrap -c exsh` to get proper line editing, history and tab completation
+you can use https://github.com/hanslub42/rlwrap with exsh: `rlwrap -c exsh` to get proper line editing, history and tab completation

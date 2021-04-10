@@ -15,7 +15,7 @@ reset resets all interactive mode variables
 
 customizing:
 
-if ~/.exshrc exists, exsh will instead of printing prompt execute ~/.exshrc and uses its outpu as prompt
+if ~/.exshrc exists, exsh will instead of printing prompt execute ~/.exshrc and uses its output as prompt
 
 example configuration can look like:
 

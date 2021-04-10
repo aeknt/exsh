@@ -1,5 +1,5 @@
 # exsh
-Execlineb but interactive (bad!)
+Execlineb but interactive (wip)
 
 different things:
 

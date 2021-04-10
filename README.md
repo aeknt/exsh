@@ -28,3 +28,5 @@ printf "\033[38;2;0;255;127m:${user}:${pwd}:$ \033[0;0m"
 more?
 
 i plan to implement function like thing that will cover both functions and aliases and also i plan to implement proper edit line stuff and history
+
+for now you can use https://github.com/hanslub42/rlwrap with exsh: `rlwrap exsh` to get proper line editing and history

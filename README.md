@@ -26,12 +26,14 @@ shift shift
 backtick all { dollarat -d " " }
 importas -s all all
 
+#some basic prompt showing user and hostname
 ifelse { test -z $first } {
 	importas user USER
 	backtick hostname { hostname }
 	importas hostname hostname
 	foreground { printf "\033[38;2;0;255;127m${user}@${hostname}$ \033[0;0m" } }
 
+#list all functions
 ifelse { test $first = functions } {
 echo "
 hello
@@ -39,10 +41,15 @@ print
 ls
 " }
 
+#function definitions
 if { test $first = fn } 
+	#when running hello, run dollarat
 	ifelse { test $fn = hello  } { dollarat }
+	#print is alias to echo
 	ifelse { test $fn = print  } { echo $all }
+	#always run ls with -l flag
 	ifelse { test $fn = ls  } { ls -l $all }
+	#when running nondefined function, echo this:
 	echo no function defined
 ```
 

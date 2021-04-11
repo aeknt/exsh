@@ -14,13 +14,22 @@ importas if if
 backtick fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
 importas fn fn
 foreground {
-ifelse { test $if = setvar } {
-	backtick var { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-	backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f3 }
-	importas var var importas cont cont
-	redirfd -a 1 /tmp/exsh echo define $var $cont } 
-ifelse { test $if = reset } {
-	rm /tmp/exsh }
+ifelse { test $if = var } {
+	backtick cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+	backtick var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
+	backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
+	backtick command { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
+	importas -s command command
+	importas var var importas cont cont importas cmd cmd
+	ifelse { test $cmd = -s } { 
+		redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
+	ifelse { test $cmd = -x } { 
+		backtick wat { $command }
+		importas wat wat
+		redirfd -a 1 /tmp/exsh echo define $var $wat } 
+	ifelse { test $cmd = -r } {
+			rm /tmp/exsh }
+	 foreground { echo var: usage: var [ -s | -x | -r ] key value... } }
 ifelse { test $if = $fn } {
 	ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
 ifelse { test $if = cd } {

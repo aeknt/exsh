@@ -7,13 +7,16 @@ interactive mode variables
 
 they are stored in /tmp/exsh (i know its insecure but i havent found better way of doing it) and because of that they are shared between all instances of exsh
 
-setvar function sets variable that is shared between multiple commands, for example:
+var function handles interactive mode variables:
 
-`setvar a b` and then running `echo $a` will print b,
+`var -s a b` sets a as b
 
-unlike `define` it cant execute command directly after it, and define unlike `setvar` cant share variables between multiple commands in interactive mode
+`var -x b uname` sets b to output of uname
 
-reset resets all interactive mode variables
+`var -r` deletes all interactive mode variables
+
+unlike `define` it cant execute command directly after it, and define unlike `var` cant share variables between multiple commands in interactive mode
+
 
 customizing:
 

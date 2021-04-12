@@ -1,44 +1,54 @@
 #!/usr/bin/env execlineb
-importas home HOME
-backtick PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
-importas PS1 PS1
-foreground { echo -n $PS1 }
-backtick functions { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc functions } { true } }
-importas functions functions
-foreground {
-forstdin -x 1 exsh_cmd
-importas exsh_cmd exsh_cmd
-importas -s exsh_split exsh_cmd
-backtick if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
-importas if if
-backtick fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
-importas fn fn
-foreground {
-ifelse { test $if = var } {
-	backtick cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-	backtick var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
-	backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
-	backtick command { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
-	importas -s command command
-	importas var var importas cont cont importas cmd cmd
-	ifelse { test $cmd = -s } { 
-		redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
-	ifelse { test $cmd = -x } { 
-		backtick wat { $command }
-		importas wat wat
-		redirfd -a 1 /tmp/exsh echo define $var $wat } 
-	ifelse { test $cmd = -r } {
-			rm /tmp/exsh }
-	 foreground { echo var: usage: var [ -s | -x | -r ] key value... } }
-ifelse { test $if = $fn } {
-	ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
-ifelse { test $if = cd } {
-	backtick path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-	importas path path
-	cd $path exsh }
-ifthenelse { test -f /tmp/exsh } { true } { touch /tmp/exsh }
-backtick env { cat /tmp/exsh }
-importas -s env env
-$env
-foreground { execlineb -c $exsh_cmd } }
-foreground { echo -n $PS1 } }
+define version 0.0.1
+importas 1 1
+ifelse { test -z $1 } { 
+	importas home HOME
+	backtick PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
+	importas PS1 PS1
+	foreground { echo -n $PS1 }
+	backtick functions { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc functions } { true } }
+	importas functions functions
+	forstdin -x 1 exsh_cmd
+
+	importas exsh_cmd exsh_cmd
+	ifelse { test -z $exsh_cmd } { foreground { echo -n $PS1 } exit }
+	foreground {
+		importas -s exsh_split exsh_cmd
+		backtick if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
+		importas if if
+		backtick fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
+		importas fn fn
+		ifelse { test $if = var } {
+			backtick cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+			backtick var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
+			backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
+			backtick command { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
+			importas -s command command
+			importas var var importas cont cont importas cmd cmd
+			ifelse { test $cmd = -s } { 
+				redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
+			ifelse { test $cmd = -x } { 
+				backtick wat { $command }
+				importas wat wat
+				redirfd -a 1 /tmp/exsh echo define $var $wat } 
+			ifelse { test $cmd = -r } {
+				rm /tmp/exsh }
+			ifelse { test $cmd = -i } {
+				redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
+			foreground { echo var: usage: var [ -s | -x | -r | -i ] key value... } }
+		ifelse { test $if = $fn } {
+			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
+		ifelse { test $if = cd } {
+			backtick path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+			importas path path
+			cd $path exsh }
+		ifthenelse { test -f /tmp/exsh } { true } { touch /tmp/exsh }
+		backtick env { cat /tmp/exsh }
+		importas -s env env
+		$env
+		foreground { execlineb -c $exsh_cmd } }
+	foreground { echo -n $PS1 } }
+ifelse { test $1 = -v } { echo $version }
+ifelse { test $1 = --version } { echo $version }
+ifelse { test $1 = -i } { rlwrap -c exsh }
+echo "exsh: usage: exsh [ -i | -v |   ]"

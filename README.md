@@ -13,6 +13,10 @@ var function handles interactive mode variables:
 
 `var -x b uname` sets b to output of uname
 
+`var -i var var` is like `importas var var`
+
+`var -e b c` sets enviroment variable b to c
+
 `var -r` deletes all interactive mode variables
 
 unlike `define` it cant execute command directly after it, and define unlike `var` cant share variables between multiple commands in interactive mode

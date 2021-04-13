@@ -35,7 +35,9 @@ ifelse { test -z $1 } {
 				rm /tmp/exsh }
 			ifelse { test $cmd = -i } {
 				redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
-			foreground { echo var: usage: var [ -s | -x | -r | -i ] key value... } }
+			ifelse { test $cmd = -e } {
+				redirfd -a 1 /tmp/exsh echo export $var "${cont}" }
+			foreground { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... } }
 		ifelse { test $if = $fn } {
 			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
 		ifelse { test $if = cd } {

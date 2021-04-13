@@ -68,3 +68,7 @@ more?
 you can use https://github.com/hanslub42/rlwrap with exsh: `rlwrap -c exsh` to get proper line editing, history and tab completation
 
 or `exsh -i` will do it automatically
+
+similiar work:
+
+	sysvinit's https://github.com/sysvinit/execshell

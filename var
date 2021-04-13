@@ -1,0 +1,22 @@
+importas cmd 1
+importas var 2
+importas cont 3
+backtick all { dollarat -d " " }
+
+backtick command { pipeline { echo $all } cut --complement -d " " -f1,2,3 }
+importas -s command command
+			
+ifelse { test -z $cmd } { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... }
+ifelse { test $cmd = -s } { 
+	redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
+ifelse { test $cmd = -x } { 
+	backtick wat { $command }
+	importas wat wat
+	redirfd -a 1 /tmp/exsh echo define $var $wat } 
+ifelse { test $cmd = -r } {
+	rm /tmp/exsh }
+ifelse { test $cmd = -i } {
+	redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
+ifelse { test $cmd = -e } {
+	redirfd -a 1 /tmp/exsh echo export $var "${cont}" }
+foreground { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... }

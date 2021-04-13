@@ -44,8 +44,8 @@ ifelse { test -z $1 } {
 			backtick path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
 			importas path path
 			cd $path exsh }
-		ifthenelse { test -f /tmp/exsh } { true } { touch /tmp/exsh }
-		backtick env { cat /tmp/exsh }
+		ifthenelse { test -f /tmp/exsh } { true } { true }
+		backtick env { foreground { redirfd -r 2 /dev/null cat /tmp/exsh } true }
 		importas -s env env
 		$env
 		foreground { execlineb -c $exsh_cmd } }

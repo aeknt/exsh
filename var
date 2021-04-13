@@ -1,3 +1,4 @@
+#!/usr/bin/env execlineb
 importas cmd 1
 importas var 2
 importas cont 3

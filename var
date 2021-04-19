@@ -19,5 +19,5 @@ ifelse { test $cmd = -r } {
 ifelse { test $cmd = -i } {
 	redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
 ifelse { test $cmd = -e } {
-	redirfd -a 1 /tmp/exsh echo export $var "${cont}" }
+	export $var "${cont}" exsh }
 foreground { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... }

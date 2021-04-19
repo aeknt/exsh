@@ -1,6 +1,5 @@
 #!/usr/bin/env execlineb
-define version 0.0.2
-importas 1 1
+multisubstitute { define version 0.0.3 importas 1 1 }
 ifelse { test -z $1 } { 
 	importas home HOME
 	backtick PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
@@ -23,8 +22,8 @@ ifelse { test -z $1 } {
 			backtick var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
 			backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
 			backtick command { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
-			importas -s command command
-			importas var var importas cont cont importas cmd cmd
+			multisubstitute { importas -s command command
+				importas var var importas cont cont importas cmd cmd }
 			ifelse { test $cmd = -s } { 
 				redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
 			ifelse { test $cmd = -x } { 
@@ -36,7 +35,7 @@ ifelse { test -z $1 } {
 			ifelse { test $cmd = -i } {
 				redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
 			ifelse { test $cmd = -e } {
-				redirfd -a 1 /tmp/exsh echo export $var "${cont}" }
+				export $var "${cont}" exsh }
 			foreground { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... } }
 		ifelse { test $if = $fn } {
 			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
@@ -45,9 +44,9 @@ ifelse { test -z $1 } {
 			importas path path
 			cd $path exsh }
 		ifthenelse { test -f /tmp/exsh } { true } { true }
-		backtick env { foreground { redirfd -r 2 /dev/null cat /tmp/exsh } true }
-		importas -s env env
-		$env
+		backtick var { foreground { redirfd -r 2 /dev/null cat /tmp/exsh } true }
+		importas -s var var
+		multisubstitute { $var }
 		foreground { execlineb -c $exsh_cmd } }
 	foreground { echo -n $PS1 } }
 ifelse { test $1 = -v } { echo $version }

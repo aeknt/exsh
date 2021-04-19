@@ -1,53 +1,52 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.0.3 importas 1 1 }
-ifelse { test -z $1 } { 
+multisubstitute { define version 0.0.4 importas 1 1 importas varstest vars define -s exsh "exsh" }
+ifelse { test -z $1 } {
+	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
 	importas home HOME
-	backtick PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
-	importas PS1 PS1
+	backtick -E PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
 	foreground { echo -n $PS1 }
-	backtick functions { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc functions } { true } }
-	importas functions functions
+	backtick -E functions { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc functions } { true } }
 	forstdin -x 1 exsh_cmd
 
 	importas exsh_cmd exsh_cmd
 	ifelse { test -z $exsh_cmd } { foreground { echo -n $PS1 } exit }
 	foreground {
 		importas -s exsh_split exsh_cmd
-		backtick if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
-		importas if if
-		backtick fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
-		importas fn fn
+		backtick -E if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
+		backtick -E fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
 		ifelse { test $if = var } {
-			backtick cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-			backtick var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
-			backtick cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
-			backtick command { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
-			multisubstitute { importas -s command command
-				importas var var importas cont cont importas cmd cmd }
+			backtick -E cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+			backtick -E var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
+			backtick comm { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
+			multisubstitute { importas -s command comm importas comm comm }
 			ifelse { test $cmd = -s } { 
-				redirfd -a 1 /tmp/exsh echo define $var "${cont}" }
+				importas vars vars
+				export vars "${vars} importas ${var} ${var}"
+				export $var "${comm}" foreground { exec $exsh } }
 			ifelse { test $cmd = -x } { 
-				backtick wat { $command }
-				importas wat wat
-				redirfd -a 1 /tmp/exsh echo define $var $wat } 
-			ifelse { test $cmd = -r } {
-				rm /tmp/exsh }
+				backtick -E wat { $command }
+				importas vars vars
+				export vars "${vars} importas ${var} ${var}"
+				export $var "${wat}" foreground { exec $exsh } }
+			ifelse { test $cmd = -u } {
+				importas vars vars
+				backtick vars { pipeline { echo "${vars}" } sed "s/ importas ${var} ${var}//g" }
+				unexport $var exec $exsh }
 			ifelse { test $cmd = -i } {
-				redirfd -a 1 /tmp/exsh echo importas $var "${cont}" }
+				importas vars vars
+				export vars "${vars} importas ${var} ${var}" exec $exsh }
 			ifelse { test $cmd = -e } {
-				export $var "${cont}" exsh }
-			foreground { echo var: usage: var [ -s | -x | -r | -i | -e ] key value... } }
+				export $var "${comm}" exec $exsh }
+			ifelse { test $cmd = -ue } {
+				unexport $var exec $exsh }
+			foreground { echo var: usage: var [ -s | -x | -u | -i | -e | -ue ] key value... } }
 		ifelse { test $if = $fn } {
 			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
 		ifelse { test $if = cd } {
-			backtick path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-			importas path path
-			cd $path exsh }
-		ifthenelse { test -f /tmp/exsh } { true } { true }
-		backtick var { foreground { redirfd -r 2 /dev/null cat /tmp/exsh } true }
-		importas -s var var
-		multisubstitute { $var }
-		foreground { execlineb -c $exsh_cmd } }
+			backtick -E path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
+			cd $path exec $exsh }
+		importas -s vars vars
+		$vars execlineb -c $exsh_cmd }
 	foreground { echo -n $PS1 } }
 ifelse { test $1 = -v } { echo $version }
 ifelse { test $1 = --version } { echo $version }

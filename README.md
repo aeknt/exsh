@@ -5,25 +5,27 @@ different things:
 
 interactive mode variables
 
-they are stored in /tmp/exsh (i know its insecure but i havent found better way of doing it) and because of that they are shared between all instances of exsh
+they are stored using enviroment variables, namely $vars which have saved what variables should be autoimported
 
-var function/script handles interactive mode variables:
+var function handles interactive mode variables:
 
 `var -s a b` sets a as b
 
-`var -x b uname` sets b to output of uname
+`var -x b uname -l` sets b to output of uname -l
 
 `var -i var var` is like `importas var var`
 
 `var -e b c` sets enviroment variable b to c
 
-`var -r` deletes all interactive mode variables
+`var -u a` unsets variable a
+
+`var -ue b` unsets enviroment variable b
 
 unlike `define` it cant execute command directly after it, and define unlike `var` cant share variables between multiple commands in interactive mode
 
-var script is there because with it you can do thing such as
+sadly you cant yet do things such as:
 
-`ifthenelse { test -f /etc/doas.conf } { var -s doas yes } { var -s doas no }` in interactive session, you cant do similiar thing with inbuild function because functions in exsh still sucks
+`ifthenelse { test -f /etc/doas.conf } { var -s doas yes } { var -s doas no }` in interactive session, because functions sucks and trying to extract `var` to its own script wont fix it entirely because it execs another instance of exsh when defining vars.
 
 
 customizing:

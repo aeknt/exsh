@@ -1,5 +1,5 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.0.4 importas 1 1 importas varstest vars define -s exsh "exsh" }
+multisubstitute { define version 0.0.5 importas 1 1 importas varstest vars define -s exsh "exsh" }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
 	importas home HOME

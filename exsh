@@ -1,5 +1,6 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.0.6 importas 1 1 importas varstest vars importas -s exsh 0 }
+multisubstitute { define version 0.0.7 importas 1 1 importas varstest vars importas -s exshexec 0 }
+backtick -E exsh { realpath $exshexec }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
 	importas home HOME

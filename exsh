@@ -1,5 +1,5 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.0.7 importas 1 1 importas varstest vars importas -s exshexec 0 }
+multisubstitute { define version 0.0.8 importas 1 1 importas varstest vars importas -s exshexec 0 }
 backtick -E exsh { realpath $exshexec }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
@@ -18,7 +18,8 @@ ifelse { test -z $1 } {
 		ifelse { test $if = var } {
 			backtick -E cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
 			backtick -E var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
-			backtick comm { pipeline { echo $exsh_cmd } cut --complement -d " " -f1,2,3 }
+			backtick -E lenght { pipeline { echo $exsh_cmd } wc -w }
+			backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
 			multisubstitute { importas -s command comm importas comm comm }
 			ifelse { test $cmd = -s } { 
 				importas vars vars

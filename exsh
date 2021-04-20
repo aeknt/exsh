@@ -46,7 +46,7 @@ ifelse { test -z $1 } {
 			backtick -E path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
 			cd $path exec $exsh }
 		importas -s vars vars
-		$vars execlineb -c $exsh_cmd }
+		multisubstitute { $vars } execlineb -c $exsh_cmd }
 	foreground { echo -n $PS1 } }
 ifelse { test $1 = -v } { echo $version }
 ifelse { test $1 = --version } { echo $version }

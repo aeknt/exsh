@@ -35,8 +35,9 @@ customizing:
 example configuration can look like:
 ```
 #!/usr/bin/env execlineb
-importas first 1
-importas fn 2
+
+#do some stuff to make this work
+multisubstitute { importas first 1 importas fn 2 }
 shift shift
 backtick all { dollarat -d " " }
 importas -s all all

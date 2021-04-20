@@ -1,5 +1,5 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.0.8 importas 1 1 importas varstest vars importas -s exshexec 0 }
+multisubstitute { define version 0.0.9 importas 1 1 importas varstest vars importas -s exshexec 0 }
 backtick -E exsh { realpath $exshexec }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
@@ -18,16 +18,17 @@ ifelse { test -z $1 } {
 		ifelse { test $if = var } {
 			backtick -E cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
 			backtick -E var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
+			backtick -E cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
 			backtick -E lenght { pipeline { echo $exsh_cmd } wc -w }
-			backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
-			multisubstitute { importas -s command comm importas comm comm }
 			ifelse { test $cmd = -s } { 
-				importas vars vars
+				backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
+				multisubstitute { importas -s command comm importas comm comm importas vars vars }
 				export vars "${vars} importas ${var} ${var}"
 				export $var "${comm}" foreground { exec $exsh } }
 			ifelse { test $cmd = -x } { 
+				backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
+				multisubstitute { importas -s command comm importas comm comm importas vars vars }
 				backtick -E wat { $command }
-				importas vars vars
 				export vars "${vars} importas ${var} ${var}"
 				export $var "${wat}" foreground { exec $exsh } }
 			ifelse { test $cmd = -u } {
@@ -35,8 +36,11 @@ ifelse { test -z $1 } {
 				backtick vars { pipeline { echo "${vars}" } sed "s/ importas ${var} ${var}//g" }
 				unexport $var exec $exsh }
 			ifelse { test $cmd = -i } {
-				importas vars vars
-				export vars "${vars} importas ${var} ${var}" exec $exsh }
+				ifelse { test -z $cont } {
+					importas vars vars
+					export vars "${vars} importas ${var} ${var}" exec $exsh }
+					importas vars vars
+					export vars "${vars} importas ${var} ${cont}" exec $exsh }
 			ifelse { test $cmd = -e } {
 				export $var "${comm}" exec $exsh }
 			ifelse { test $cmd = -ue } {

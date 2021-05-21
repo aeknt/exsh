@@ -1,5 +1,5 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.1.1 importas 1 1 importas varstest vars importas -s exshexec 0 }
+multisubstitute { define version 0.2.0 importas 1 1 importas varstest vars importas exshexec 0 }
 backtick -E exsh { realpath $exshexec }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
@@ -15,38 +15,6 @@ ifelse { test -z $1 } {
 		importas -s exsh_split exsh_cmd
 		backtick -E if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
 		backtick -E fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
-		ifelse { test $if = var } {
-			backtick -E cmd { pipeline { echo $exsh_cmd } cut -d " " -f2 }
-			backtick -E var { pipeline { echo $exsh_cmd } cut -d " " -f3 }
-			backtick -E cont { pipeline { echo $exsh_cmd } cut -d " " -f4 }
-			backtick -E lenght { pipeline { echo $exsh_cmd } wc -w }
-			ifelse { test $cmd = -s } { 
-				backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
-				multisubstitute { importas -s command comm importas comm comm importas vars vars }
-				export vars "${vars} importas ${var} ${var}"
-				export $var "${comm}" foreground { exec $exsh } }
-			ifelse { test $cmd = -x } { 
-				backtick comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
-				multisubstitute { importas -s command comm importas comm comm importas vars vars }
-				backtick -E wat { $command }
-				export vars "${vars} importas ${var} ${var}"
-				export $var "${wat}" foreground { exec $exsh } }
-			ifelse { test $cmd = -u } {
-				importas vars vars
-				backtick vars { pipeline { echo "${vars}" } sed "s/ importas ${var} ${var}//g" }
-				unexport $var exec $exsh }
-			ifelse { test $cmd = -i } {
-				ifelse { test -z $cont } {
-					importas vars vars
-					export vars "${vars} importas ${var} ${var}" exec $exsh }
-					importas vars vars
-					export vars "${vars} importas ${var} ${cont}" exec $exsh }
-			ifelse { test $cmd = -e } {
-				backtick -E comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
-				export $var "${comm}" exec $exsh }
-			ifelse { test $cmd = -ue } {
-				unexport $var exec $exsh }
-			foreground { echo var: usage: var [ -s | -x | -u | -i | -e | -ue ] key value... } }
 		ifelse { test $if = $fn } {
 			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
 		ifelse { test $if = cd } {
@@ -61,16 +29,49 @@ ifelse { test -z $1 } {
 			cd $path importas -s vars vars
 			multisubstitute { $vars } execlineb -c $comm }
 		importas -s vars vars
-		multisubstitute { $vars } execlineb -c $exsh_cmd }
+		backtick -E exsh_fn_cmd { pipeline { echo $exsh_cmd } sed "s'%var'${exsh} %var'g" }
+		multisubstitute { $vars } execlineb -c $exsh_fn_cmd }
 	foreground { echo -n $PS1 } }
 ifelse { test $1 = -v } { echo $version }
 ifelse { test $1 = --version } { echo $version }
 ifelse { test $1 = -i } { rlwrap -c exsh }
+ifelse { test $1 = %var } {
+	backtick action { dollarat }
+	multisubstitute { importas -su action action importas cmd 2 importas var 3 importas cont 4 }
+	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh $action } { true }
+	backtick -E lenght { pipeline { echo $action } wc -w }
+	ifelse { test $cmd = -s } { 
+		backtick comm { pipeline { echo $action } cut -d " " -f4-${lenght} }
+		multisubstitute { importas -s command comm importas comm comm importas vars vars }
+		export vars "${vars} importas ${var} ${var}"
+		export $var "${comm}" foreground { exec $exsh } }
+	ifelse { test $cmd = -x } { 
+		backtick comm { pipeline { echo $action } cut -d " " -f4-${lenght} }
+		multisubstitute { importas -s command comm importas comm comm importas vars vars }
+		backtick -E wat { $command }
+		export vars "${vars} importas ${var} ${var}"
+		export $var "${wat}" foreground { exec $exsh } }
+	ifelse { test $cmd = -u } {
+		importas vars vars
+		backtick vars { pipeline { echo "${vars}" } sed "s/ importas ${var} ${var}//g" }
+		unexport $var exec $exsh }
+	ifelse { test $cmd = -i } {
+		ifelse { test -z $cont } {
+			importas vars vars
+			export vars "${vars} importas ${var} ${var}" exec $exsh }
+			importas vars vars
+			export vars "${vars} importas ${var} ${cont}" exec $exsh }
+	ifelse { test $cmd = -e } {
+		backtick -E comm { pipeline { echo $exsh_cmd } cut -d " " -f4-${lenght} }
+		export $var "${comm}" exec $exsh }
+	ifelse { test $cmd = -ue } {
+		unexport $var exec $exsh }
+	foreground { echo var: usage: "$var" [ -s | -x | -u | -i | -e | -ue ] key value... } }
 ifelse { test $1 = -h } { 
 	echo "exsh: usage: exsh [ -i | -v | -h | --version |   ] 
 ----[functions]----
 	function: cd: usage: cd path [ prog... ]
-	function: var: usage: var [ -s | -x | -u | -i | -e | -ue ] key value...
+	function: %var: usage: %var [ -s | -x | -u | -i | -e | -ue ] key value...
 ----[config]----
 	location: `importas home HOME $home/.exshrc`
 	when ran without args, it should print prompt

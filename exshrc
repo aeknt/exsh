@@ -1,0 +1,33 @@
+#!/usr/bin/env execlineb
+#do some stuff to make this work
+multisubstitute { importas first 1 importas fn 2 }
+shift shift
+backtick all { dollarat -d " " }
+importas -s all all
+
+ifelse { test -z $first } {
+	printf "\033[38;2;0;255;127m$ \033[0;0m" }
+
+ifelse { test $first = functions } {
+echo "
+reload
+print
+ls
+fork
+pwd
+pid
+undefined
+sl
+" }
+
+if { test $first = fn } 
+		ifelse { test $fn = reload  } { exsh }
+		ifelse { test $fn = pid  } { getpid -E pid echo $pid }
+		ifelse { test $fn = print  } { execlineb -c "dollarat" $all }
+		ifelse { test $fn = ls  } { elglob wtf * echo $wtf }
+		ifelse { test $fn = pwd  } { getcwd -E cwd echo $cwd }
+		ifelse { test $fn = fork } {
+			forbacktickx -pEd "" ARG { dollarat -d "" }
+			execlineb -c $ARG
+		}
+		echo no function defined

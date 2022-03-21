@@ -1,12 +1,14 @@
 #!/usr/bin/env execlineb
-multisubstitute { define version 0.2.0 importas 1 1 importas varstest vars importas exshexec 0 }
+getpid -E pid
+multisubstitute { define version 0.2.1 importas 1 1 importas varstest vars importas exshexec 0 importas exshrc exshrc }
 backtick -E exsh { realpath $exshexec }
 ifelse { test -z $1 } {
 	ifthenelse { test -z $varstest  } { export vars "importas 0 0" exec $exsh } { true } 
 	importas home HOME
-	backtick -E PS1 { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
+	backtick -E configlocation { ifthenelse { test -z $exshrc } { printf ${home}/.exshrc } { printf ${exshrc} } }
+	backtick -E PS1 { ifthenelse { test -f ${configlocation} } { ${configlocation} } { printf "\033[38;2;0;255;127m→ \033[0;0m" } }
 	foreground { echo -n $PS1 }
-	backtick -E functions { ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc functions } { true } }
+	backtick -E functions { ifthenelse { test -f ${configlocation} } { ${configlocation} functions } { true } }
 	forstdin -o 0 exsh_cmd
 
 	importas exsh_cmd exsh_cmd
@@ -16,7 +18,7 @@ ifelse { test -z $1 } {
 		backtick -E if { pipeline { echo $exsh_cmd } cut -d " " -f1 }
 		backtick -E fn { foreground { pipeline { echo $functions } grep -w ${if} } true }
 		ifelse { test $if = $fn } {
-			ifthenelse { test -f ${home}/.exshrc } { ${home}/.exshrc fn $exsh_split } { true } }
+			ifthenelse { test -f ${configlocation} } { ${configlocation} fn $exsh_split } { true } }
 		ifelse { test $if = cd } {
 			backtick -E path { pipeline { echo $exsh_cmd } cut -d " " -f2 }
 			backtick -E another { pipeline { echo $exsh_cmd } cut -d " " -f3 }
@@ -28,13 +30,15 @@ ifelse { test -z $1 } {
 			backtick -E comm { pipeline { echo $exsh_cmd } cut -d " " -f3-${lenght} }
 			cd $path importas -s vars vars
 			multisubstitute { $vars } execlineb -c $comm }
+		ifelse { test $if = exit } {
+			kill $pid }
 		importas -s vars vars
 		backtick -E exsh_fn_cmd { pipeline { echo $exsh_cmd } sed "s'%var'${exsh} %var'g" }
 		multisubstitute { $vars } execlineb -c $exsh_fn_cmd }
 	foreground { echo -n $PS1 } }
 ifelse { test $1 = -v } { echo $version }
 ifelse { test $1 = --version } { echo $version }
-ifelse { test $1 = -i } { rlwrap -c exsh }
+ifelse { test $1 = -i } { rlwrap -c $exsh }
 ifelse { test $1 = %var } {
 	backtick action { dollarat }
 	multisubstitute { importas -su action action importas cmd 2 importas var 3 importas cont 4 }
@@ -71,9 +75,11 @@ ifelse { test $1 = -h } {
 	echo "exsh: usage: exsh [ -i | -v | -h | --version |   ] 
 ----[functions]----
 	function: cd: usage: cd path [ prog... ]
+	function: exit: usage: exit (may require using it multiple times because exsh is forking monstrozity)
 	function: %var: usage: %var [ -s | -x | -u | -i | -e | -ue ] key value...
 ----[config]----
-	location: `importas home HOME $home/.exshrc`
+	location: `importas home HOME $home/.exshrc` (default)
+	use enviroment variable exshrc to change location of it
 	when ran without args, it should print prompt
 	when ran with functions arg, it should print all functions defined
 	when ran with fn <function>, it should execute given function

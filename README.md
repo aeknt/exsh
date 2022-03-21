@@ -21,7 +21,7 @@ they are stored using enviroment variables, namely $vars which have saved what v
 
 `%var -ue b` unsets enviroment variable b
 
-unlike `define` it cant execute command directly after it, and define unlike `var` cant share variables between multiple commands in interactive mode
+unlike `define` it cant execute command directly after it, and `define` unlike `var` cant share variables between multiple commands in interactive mode
 
 ~~sadly you cant yet do things such as:~~
 
@@ -30,6 +30,8 @@ unlike `define` it cant execute command directly after it, and define unlike `va
 edit: you can do that because %var is handled as substitution
 
 customizing:
+
+config can be defined by `exshrc` enviroment variable, default value is basically ~/.exshrc
 
 ~/.exshrc can be written in any lang as long as ~/.exshrc prints wanted $PS1 when ran without args, when ran with arg function then print all defined functions and when ran with fn <function> then execute given function
 
